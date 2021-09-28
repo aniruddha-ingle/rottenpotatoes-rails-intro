@@ -8,7 +8,7 @@ class MoviesController < ApplicationController
 
   def index
     ratings = params[:ratings]
-    @ratings_list = Movie.ratings_list
+    @all_ratings = Movie.all_ratings
     
     if (request.referrer).nil?
       session.clear
@@ -26,7 +26,7 @@ class MoviesController < ApplicationController
     sort_by = params[:sort]
     #When all boxes are unchecked we want to display as all ratings are checked
     if (params[:ratings].nil? and params[:commit]=="Refresh")
-      @ratings_to_show = Movie.ratings_list
+      @ratings_to_show = Movie.all_ratings
       @movies = Movie.use_ratings(@ratings_to_show, session[:sort])
       session[:ratings] = params[:rating]
     #When returning from another pager it should remember the ratings/sort 
@@ -37,7 +37,7 @@ class MoviesController < ApplicationController
       if !params[:ratings].nil?
         ratings = params[:ratings].keys
       else
-        ratings = @ratings_list
+        ratings = @all_ratings
       end
       if sort_by == 'title'
         @sort_by = sort_by
