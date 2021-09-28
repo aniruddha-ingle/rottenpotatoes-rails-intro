@@ -8,7 +8,7 @@ class MoviesController < ApplicationController
 
   def index
     ratings = params[:ratings]
-    @all_ratings = Movie.all_ratings
+    @ratings_list = Movie.ratings_list
     
     if (request.referrer).nil?
       session.clear
@@ -26,8 +26,8 @@ class MoviesController < ApplicationController
     sort_by = params[:sort]
     #When all boxes are unchecked we want to display as all ratings are checked
     if (params[:ratings].nil? and params[:commit]=="Refresh")
-      @ratings_to_show = Movie.all_ratings
-      @movies = Movie.with_ratings(@ratings_to_show, session[:sort])
+      @ratings_to_show = Movie.ratings_list
+      @movies = Movie.use_ratings(@ratings_to_show, session[:sort])
       session[:ratings] = params[:rating]
     #When returning from another pager it should remember the ratings/sort 
     elsif (params[:ratings].nil? && !session[:ratings].nil?) || (params[:sort].nil? && !session[:sort].nil?)
@@ -37,7 +37,7 @@ class MoviesController < ApplicationController
       if !params[:ratings].nil?
         ratings = params[:ratings].keys
       else
-        ratings = @all_ratings
+        ratings = @ratings_list
       end
       if sort_by == 'title'
         @sort_by = sort_by
@@ -52,20 +52,20 @@ class MoviesController < ApplicationController
       end
       
       @ratings_to_show = ratings
-      @movies = Movie.with_ratings(@ratings_to_show, @sort_by)
+      @movies = Movie.use_ratings(@ratings_to_show, @sort_by)
     
       
     end
     
     
   end
-
+  
   def new
     # default: render 'new' template
   end
 
   def create
-    @movie = Movie.create!(movie_params)
+    @movie = Movie.create!(param_list)
     flash[:notice] = "#{@movie.title} was successfully created."
     redirect_to movies_path
   end
@@ -76,7 +76,7 @@ class MoviesController < ApplicationController
 
   def update
     @movie = Movie.find params[:id]
-    @movie.update_attributes!(movie_params)
+    @movie.update_attributes!(param_list)
     flash[:notice] = "#{@movie.title} was successfully updated."
     redirect_to movie_path(@movie)
   end
@@ -89,9 +89,8 @@ class MoviesController < ApplicationController
   end
 
   private
-  # Making "internal" methods private is not required, but is a common practice.
-  # This helps make clear which methods respond to requests, and which ones do not.
-  def movie_params
+  
+  def param_list
     params.require(:movie).permit(:title, :rating, :description, :release_date)
   end
 end
