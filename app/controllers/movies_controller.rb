@@ -9,55 +9,51 @@ class MoviesController < ApplicationController
   def index
     ratings = params[:ratings]
     @all_ratings = Movie.all_ratings
-    
     if (request.referrer).nil?
       session.clear
     end
-
     #Store current rating and sort parameters in session to be remembered
     if !params[:ratings].nil?
       session[:ratings] = ratings 
     end
-    
     if !params[:sort].nil?
       session[:sort] = params[:sort]
     end
-
-    sort_by = params[:sort]
+    order_by = params[:sort]
     #When all boxes are unchecked we want to display as all ratings are checked
     if (params[:ratings].nil? and params[:commit]=="Refresh")
-      @ratings_to_show = Movie.all_ratings
-      @movies = Movie.use_ratings(@ratings_to_show, session[:sort])
+      @check_boxes = []
+      @movies = Movie.use_ratings(@check_boxes, session[:sort])
       session[:ratings] = params[:rating]
+      flash[:notice] = "All Checkboxes Were Empty! Please select at least one rating!"
     #When returning from another pager it should remember the ratings/sort 
     elsif (params[:ratings].nil? && !session[:ratings].nil?) || (params[:sort].nil? && !session[:sort].nil?)
+      flash[:notice] = nil
       redirect_to movies_path("ratings" => session[:ratings], "sort" => session[:sort])
     
     else
+      flash[:notice] = nil
       if !params[:ratings].nil?
         ratings = params[:ratings].keys
       else
         ratings = @all_ratings
       end
-      if sort_by == 'title'
-        @sort_by = sort_by
-        @selected = 'title'
-      elsif sort_by=='release_date'
-        @sort_by = sort_by
+      if order_by=='release_date'
+        @order_by = order_by
         @selected = 'release_date'
+      elsif order_by == 'title'
+        @order_by = order_by
+        @selected = 'title'
       else
-        @sort_by = ""
-        @ratings_to_show = ratings
+        @order_by = ""
+        @check_boxes = ratings
         @selected = nil
+      
       end
       
-      @ratings_to_show = ratings
-      @movies = Movie.use_ratings(@ratings_to_show, @sort_by)
-    
-      
+      @check_boxes = ratings
+      @movies = Movie.use_ratings(@check_boxes, @order_by)
     end
-    
-    
   end
   
   def new
