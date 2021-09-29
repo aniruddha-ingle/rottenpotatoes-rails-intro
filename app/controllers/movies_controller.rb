@@ -41,14 +41,14 @@ class MoviesController < ApplicationController
       end
       if sort_by == 'title'
         @sort_by = sort_by
-        @highlight = 'title'
+        @selected = 'title'
       elsif sort_by=='release_date'
         @sort_by = sort_by
-        @highlight = 'release_date'
+        @selected = 'release_date'
       else
         @sort_by = ""
         @ratings_to_show = ratings
-        @highlight = nil
+        @selected = nil
       end
       
       @ratings_to_show = ratings

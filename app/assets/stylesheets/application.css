@@ -13,6 +13,6 @@
  *= require_tree .
  *= require_self
  */
- #movies .highlight{
+ #movies .selected{
     background-color: yellow;
 }
